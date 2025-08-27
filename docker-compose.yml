@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: projecthub
+      POSTGRES_PASSWORD: projecthub
+      POSTGRES_DB: projecthub
+    ports:
+      - "5442:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgresql://projecthub:projecthub@db:5432/projecthub?schema=public
+      JWT_SECRET: dev-secret
+      JWT_REFRESH_SECRET: dev-refresh-secret
+      CORS_ORIGIN: http://localhost:8080
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./spark-junction
+    command: npm run dev
+    environment:
+      VITE_API_URL: http://localhost:4000/api
+      VITE_SOCKET_URL: http://localhost:4000
+      VITE_RAZORPAY_KEY: rzp_test_1234567890
+      VITE_STRIPE_PUBLISHABLE_KEY: pk_test_1234567890
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./spark-junction:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
+
+
+ 

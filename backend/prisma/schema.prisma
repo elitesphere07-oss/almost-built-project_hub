@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  role      String   @default("student")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders           Order[]
+  projectRequests  ProjectRequest[]
+  notifications    Notification[]
+}
+
+model Project {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String
+  branch      String
+  isFeatured  Boolean   @default(false)
+  tags        String[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  orders      Order[]
+}
+
+model Order {
+  id        String   @id @default(cuid())
+  userId    Int?
+  projectId Int?
+  status    String   @default("pending")
+  amount    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User?    @relation(fields: [userId], references: [id])
+  project   Project? @relation(fields: [projectId], references: [id])
+}
+
+model ProjectRequest {
+  id        String   @id @default(cuid())
+  userId    Int?
+  title     String
+  details   String
+  status    String   @default("pending")
+  budget    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    Int?
+  title     String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+

@@ -1,0 +1,252 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Project Hub - Glassmorphism Design System */
+
+@layer base {
+  :root {
+    /* Base colors - Light theme */
+    --background: 210 20% 98%;
+    --foreground: 222 20% 11%;
+
+    /* Glassmorphism surfaces */
+    --glass: 0 0% 100%;
+    --glass-border: 220 10% 90%;
+    --glass-shadow: 220 15% 80%;
+    
+    /* Cards with glass effect */
+    --card: 0 0% 100%;
+    --card-foreground: 222 20% 11%;
+
+    /* Neon accent colors */
+    --neon-primary: 190 100% 50%;
+    --neon-secondary: 270 100% 65%;
+    --neon-tertiary: 320 100% 60%;
+    
+    /* Primary system colors */
+    --primary: 190 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 190 100% 70%;
+
+    /* Secondary colors */
+    --secondary: 220 8% 95%;
+    --secondary-foreground: 222 20% 11%;
+
+    /* Muted colors */
+    --muted: 220 8% 96%;
+    --muted-foreground: 215 15% 55%;
+
+    /* Accent colors */
+    --accent: 270 100% 65%;
+    --accent-foreground: 0 0% 100%;
+    --accent-glow: 270 100% 75%;
+
+    /* Status colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* UI elements */
+    --border: 220 10% 88%;
+    --input: 220 10% 94%;
+    --ring: 190 100% 50%;
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(220 8% 98%) 0%, hsl(220 8% 92%) 100%);
+    --gradient-mesh: radial-gradient(ellipse at top left, hsl(var(--neon-primary) / 0.1) 0%, transparent 50%),
+                     radial-gradient(ellipse at top right, hsl(var(--neon-secondary) / 0.1) 0%, transparent 50%),
+                     radial-gradient(ellipse at bottom, hsl(var(--neon-tertiary) / 0.05) 0%, transparent 50%);
+
+    /* Glass effects */
+    --glass-bg: hsla(0, 0%, 100%, 0.8);
+    --glass-border-color: hsla(220, 10%, 90%, 0.4);
+    --glass-shadow: 0 8px 32px hsla(220, 15%, 80%, 0.1);
+
+    /* Animation durations */
+    --transition-fast: 180ms;
+    --transition-normal: 250ms;
+    --transition-slow: 350ms;
+  }
+
+  .dark {
+    /* Base colors - Dark theme */
+    --background: 222 20% 6%;
+    --foreground: 210 20% 92%;
+
+    /* Glassmorphism surfaces */
+    --glass: 222 20% 8%;
+    --glass-border: 220 10% 20%;
+    --glass-shadow: 220 15% 5%;
+    
+    /* Cards with glass effect */
+    --card: 222 20% 8%;
+    --card-foreground: 210 20% 92%;
+
+    /* Neon accent colors (brighter in dark) */
+    --neon-primary: 190 100% 60%;
+    --neon-secondary: 270 100% 70%;
+    --neon-tertiary: 320 100% 65%;
+    
+    /* Primary system colors */
+    --primary: 190 100% 60%;
+    --primary-foreground: 222 20% 6%;
+    --primary-glow: 190 100% 80%;
+
+    /* Secondary colors */
+    --secondary: 222 15% 12%;
+    --secondary-foreground: 210 20% 92%;
+
+    /* Muted colors */
+    --muted: 222 15% 10%;
+    --muted-foreground: 215 15% 65%;
+
+    /* Accent colors */
+    --accent: 270 100% 70%;
+    --accent-foreground: 222 20% 6%;
+    --accent-glow: 270 100% 85%;
+
+    /* Status colors (adjusted for dark) */
+    --success: 142 70% 45%;
+    --success-foreground: 222 20% 6%;
+    --warning: 38 85% 55%;
+    --warning-foreground: 222 20% 6%;
+    --destructive: 0 75% 65%;
+    --destructive-foreground: 222 20% 6%;
+
+    /* UI elements */
+    --border: 220 10% 18%;
+    --input: 220 10% 12%;
+    --ring: 190 100% 60%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(222 15% 10%) 0%, hsl(222 15% 8%) 100%);
+    --gradient-mesh: radial-gradient(ellipse at top left, hsl(var(--neon-primary) / 0.15) 0%, transparent 50%),
+                     radial-gradient(ellipse at top right, hsl(var(--neon-secondary) / 0.15) 0%, transparent 50%),
+                     radial-gradient(ellipse at bottom, hsl(var(--neon-tertiary) / 0.1) 0%, transparent 50%);
+
+    /* Glass effects */
+    --glass-bg: hsla(222, 20%, 8%, 0.8);
+    --glass-border-color: hsla(220, 10%, 20%, 0.4);
+    --glass-shadow: 0 8px 32px hsla(220, 15%, 5%, 0.3);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image: var(--gradient-mesh);
+    background-attachment: fixed;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.3);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.5);
+  }
+}
+
+@layer components {
+  /* Glass morphism effects */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border-color);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-card {
+    @apply glass rounded-xl;
+  }
+
+  .glass-subtle {
+    background: hsla(var(--glass) / 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--glass-border) / 0.2);
+  }
+
+  /* Neon glow effects */
+  .neon-glow {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+
+  .neon-glow-accent {
+    box-shadow: 0 0 20px hsl(var(--accent) / 0.3);
+  }
+
+  .neon-text {
+    text-shadow: 0 0 10px hsl(var(--primary) / 0.5);
+  }
+
+  /* Hover elevations */
+  .hover-elevate {
+    transition: transform var(--transition-normal) ease, box-shadow var(--transition-normal) ease;
+  }
+
+  .hover-elevate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px hsl(var(--primary) / 0.15);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Loading animation */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-glow {
+    from {
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+    }
+    to {
+      box-shadow: 0 0 30px hsl(var(--primary) / 0.6);
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

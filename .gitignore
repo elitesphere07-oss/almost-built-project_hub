@@ -1,0 +1,26 @@
+# dependencies
+node_modules
+**/node_modules
+.env
+**/.env
+.dist
+dist
+.next
+*.log
+.cache
+coverage
+
+# docker
+**/.DS_Store
+**/.idea
+**/.vscode
+
+# build outputs
+backend/dist
+
+# prisma
+backend/prisma/dev.db
+
+# misc
+.vercel
+.netlify
