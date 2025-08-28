@@ -1,0 +1,145 @@
+# =============================================================================
+# PROJECT HUB - PRODUCTION DOCKER COMPOSE CONFIGURATION
+# =============================================================================
+# 
+# PRODUCTION DEPLOYMENT CONFIGURATION:
+# This setup is optimized for production deployment with proper security,
+# reverse proxy, and environment isolation.
+#
+# PRODUCTION FEATURES:
+# - No direct database exposure (security)
+# - Reverse proxy for frontend and API
+# - Environment-specific configurations
+# - Proper network isolation
+# - SSL/TLS termination
+# - Health checks and monitoring
+#
+# DEPLOYMENT STEPS:
+# 1. Set up reverse proxy (nginx/traefik)
+# 2. Configure SSL certificates
+# 3. Set production environment variables
+# 4. Use proper domain names
+# 5. Set up monitoring and logging
+# =============================================================================
+
+version: '3.9'
+
+services:
+  # =============================================================================
+  # DATABASE SERVICE (PRODUCTION)
+  # =============================================================================
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-projecthub}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-projecthub}
+      POSTGRES_DB: ${DB_NAME:-projecthub}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    # PRODUCTION: No port exposure for security
+    # ports:
+    #   - "5432:5432"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-projecthub}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # =============================================================================
+  # BACKEND API SERVICE (PRODUCTION)
+  # =============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${DB_USER:-projecthub}:${DB_PASSWORD:-projecthub}@db:5432/${DB_NAME:-projecthub}?schema=public
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      # PRODUCTION: Restrict CORS to specific domain(s)
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://yourdomain.com}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    # PRODUCTION: No direct port exposure, use reverse proxy
+    # ports:
+    #   - "4000:4000"
+
+  # =============================================================================
+  # FRONTEND SERVICE (PRODUCTION)
+  # =============================================================================
+  frontend:
+    build:
+      context: ./spark-junction
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      # PRODUCTION: Use domain name or relative paths
+      VITE_API_URL: ${VITE_API_URL:-https://api.yourdomain.com}
+      VITE_SOCKET_URL: ${VITE_SOCKET_URL:-wss://api.yourdomain.com}
+      VITE_RAZORPAY_KEY: ${VITE_RAZORPAY_KEY}
+      VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
+    volumes:
+      - ./spark-junction:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - frontend
+    # PRODUCTION: No direct port exposure, use reverse proxy
+    # ports:
+    #   - "8080:8080"
+
+  # =============================================================================
+  # REVERSE PROXY (NGINX) - PRODUCTION
+  # =============================================================================
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/sites:/etc/nginx/sites:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - frontend
+      - backend
+
+# =============================================================================
+# NETWORKS (PRODUCTION)
+# =============================================================================
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true  # Backend network not accessible from outside
+
+# =============================================================================
+# VOLUMES (PRODUCTION)
+# =============================================================================
+volumes:
+  db_data:
+    driver: local

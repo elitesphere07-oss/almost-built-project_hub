@@ -1,4 +1,28 @@
+# =============================================================================
+# PROJECT HUB - DOCKER COMPOSE CONFIGURATION
+# =============================================================================
+# 
+# DEVELOPMENT NETWORK CONFIGURATION:
+# This setup allows team members on the same WiFi network to access the application
+# during development testing. For production, see PRODUCTION NOTES below.
+#
+# NETWORK ACCESS:
+# - Frontend: http://192.168.1.5:8080 (accessible from any device on same WiFi)
+# - Backend API: http://192.168.1.5:4000 (accessible from any device on same WiFi)
+# - Database: localhost:5442 (only accessible from host machine for security)
+#
+# PRODUCTION NOTES:
+# - Remove host port mappings for database (security)
+# - Use reverse proxy (nginx/traefik) for frontend
+# - Use proper domain names instead of IP addresses
+# - Configure SSL certificates
+# - Use environment-specific .env files
+# =============================================================================
+
 services:
+  # =============================================================================
+  # DATABASE SERVICE
+  # =============================================================================
   db:
     image: postgres:16-alpine
     restart: always
@@ -7,46 +31,73 @@ services:
       POSTGRES_PASSWORD: projecthub
       POSTGRES_DB: projecthub
     ports:
+      # DEVELOPMENT: Expose database port for local development tools
+      # PRODUCTION: Remove this port mapping for security
       - "5442:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    # DEVELOPMENT: Allow connections from any host for team testing
+    # PRODUCTION: Use proper network isolation
+    command: postgres -c listen_addresses='*'
 
+  # =============================================================================
+  # BACKEND API SERVICE
+  # =============================================================================
   backend:
     build:
       context: ./backend
-    command: npm run dev
     environment:
       NODE_ENV: development
       PORT: 4000
+      # DEVELOPMENT: Connect to database using service name
       DATABASE_URL: postgresql://projecthub:projecthub@db:5432/projecthub?schema=public
       JWT_SECRET: dev-secret
       JWT_REFRESH_SECRET: dev-refresh-secret
-      CORS_ORIGIN: http://localhost:8080
+      # DEVELOPMENT: Allow CORS from any origin on local network
+      # PRODUCTION: Restrict to specific domain(s)
+      CORS_ORIGIN: http://192.168.1.5:8080,http://localhost:8080
     ports:
+      # DEVELOPMENT: Expose backend API to network for team testing
+      # PRODUCTION: Use reverse proxy, don't expose directly
       - "4000:4000"
     volumes:
       - ./backend:/app
       - /app/node_modules
     depends_on:
       - db
+    # DEVELOPMENT: Allow backend to bind to all interfaces
+    # PRODUCTION: Use proper network isolation
+    command: sh -c "npm run dev -- --host 0.0.0.0"
 
+  # =============================================================================
+  # FRONTEND SERVICE
+  # =============================================================================
   frontend:
     build:
       context: ./spark-junction
-    command: npm run dev
     environment:
-      VITE_API_URL: http://localhost:4000/api
-      VITE_SOCKET_URL: http://localhost:4000
+      # DEVELOPMENT: Point to backend API accessible on network
+      # PRODUCTION: Use domain name or relative paths
+      VITE_API_URL: http://192.168.1.5:4000/api
+      VITE_SOCKET_URL: http://192.168.1.5:4000
       VITE_RAZORPAY_KEY: rzp_test_1234567890
       VITE_STRIPE_PUBLISHABLE_KEY: pk_test_1234567890
     ports:
+      # DEVELOPMENT: Expose frontend to network for team testing
+      # PRODUCTION: Use reverse proxy (nginx/traefik)
       - "8080:8080"
     volumes:
       - ./spark-junction:/app
       - /app/node_modules
     depends_on:
       - backend
+    # DEVELOPMENT: Allow frontend to bind to all interfaces
+    # PRODUCTION: Use proper network isolation
+    command: sh -c "npm run dev -- --host 0.0.0.0 --port 8080"
 
+# =============================================================================
+# VOLUMES
+# =============================================================================
 volumes:
   db_data:
 
